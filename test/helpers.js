@@ -3,12 +3,21 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { JSDOM, VirtualConsole } from 'jsdom';
+import { populatedHtml } from '../scripts/create-test-document.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const APP_PATH = path.join(here, '..', 'index.html');
 
 export function appSource() {
   return readFileSync(APP_PATH, 'utf8');
+}
+
+export function populatedAppSource() {
+  return populatedHtml();
+}
+
+export function loadPopulatedApp(options) {
+  return loadApp(populatedHtml(), options);
 }
 
 export function screenStyles() {

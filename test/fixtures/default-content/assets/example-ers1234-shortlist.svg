@@ -1,0 +1,8 @@
+<svg id="example-shot-svg" xmlns="http://www.w3.org/2000/svg" width="460" height="240" viewBox="0 0 460 240" style="display:none" aria-hidden="true">
+  <rect x="1" y="1" width="458" height="238" rx="6" fill="#f7f7f5" stroke="#b5b5b0" stroke-width="2"></rect>
+  <text x="24" y="56" font-family="system-ui, sans-serif" font-size="16" fill="#333333">MOCK SCREENSHOT OF A WEB APPLICATION</text>
+  <text x="24" y="88" font-family="system-ui, sans-serif" font-size="16" fill="#333333">SHOWING BASIC DETAILS OF A REFERRAL</text>
+  <text x="24" y="120" font-family="system-ui, sans-serif" font-size="16" fill="#333333">WITH STATE 'TRIAGED - PROVIDER TO ACTION'</text>
+  <text x="24" y="152" font-family="system-ui, sans-serif" font-size="16" fill="#333333">PROMINENTLY PRESENTED</text>
+  <circle cx="410" cy="56" r="22" fill="none" stroke="#555555" stroke-width="2" stroke-dasharray="3 5"></circle>
+</svg>

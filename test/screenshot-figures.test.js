@@ -13,7 +13,7 @@ import { sectionAction,
   waitFor,
 } from './helpers.js';
 
-test('screenshot rows present intentional figures without changing their sizing lane', () => {
+test('screenshot rows leave image edges clear without changing their sizing lane', () => {
   const css = screenStyles().split('@media print')[0];
   const figure = stylesheetRule(css, '.ev-screenshot');
   const image = stylesheetRule(css, '.ev-screenshot > .ev-img');
@@ -23,10 +23,7 @@ test('screenshot rows present intentional figures without changing their sizing 
   assert.match(figure, /box-sizing:\s*border-box/);
   assert.match(figure, /min-width:\s*0/);
   assert.match(image, /box-sizing:\s*border-box/);
-  assert.match(image, /border:\s*1px solid var\(--ev-divider\)/);
-  assert.match(image, /border-radius:\s*6px/);
-  assert.match(image, /background:\s*rgba\(128,\s*128,\s*128,\s*0\.04\)/);
-  assert.match(image, /box-shadow:\s*0 2px 10px rgba\(0,\s*0,\s*0,\s*0\.18\)/);
+  assert.doesNotMatch(image, /(?:padding|border|background|box-shadow)\s*:/);
   assert.match(row, /width:\s*min\(var\(--ev-media-measure\),/);
   assert.match(caption, /color:\s*rgba\(128,\s*128,\s*128,\s*0\.84\)/);
   assert.match(caption, /line-height:\s*1\.35/);
@@ -40,7 +37,7 @@ test('screenshot rows stay inside the evidence content column', () => {
   assert.doesNotMatch(row, /max-width:\s*none/);
 });
 
-test('figure styling keeps narrow and wide screenshots bounded while print removes decoration', () => {
+test('narrow and wide screenshots stay bounded without image decoration', () => {
   const document = new JSDOM(appSource()).window.document;
   const rules = [...document.styleSheets[0].cssRules];
   const style = (selector) => rules.find((rule) => rule.selectorText === selector)?.style;
@@ -53,14 +50,12 @@ test('figure styling keeps narrow and wide screenshots bounded while print remov
   assert.equal(figure.minWidth, '0px');
   assert.equal(figure.maxWidth, '100%');
   assert.equal(imageFigure.boxSizing, 'border-box');
+  assert.equal(imageFigure.padding, '');
+  assert.equal(imageFigure.border, '');
+  assert.equal(imageFigure.boxShadow, '');
   assert.equal(item.minWidth, '0px');
   assert.equal(item.maxWidth, '100%');
   assert.equal(image.maxWidth, '100%');
-  assert.match(
-    appSource(),
-    /\.ev-screenshot > \.ev-img\s*\{[^}]*border:\s*none[^}]*border-radius:\s*0[^}]*box-shadow:\s*none[^}]*background:\s*transparent/,
-    'print CSS explicitly resets figure decoration',
-  );
 });
 
 test('pasted figure captions, alignment, sizing, and clean persistence remain intact', async () => {

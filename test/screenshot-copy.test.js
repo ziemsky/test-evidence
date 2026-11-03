@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { sectionAction,
   loadApp,
+  loadPopulatedApp,
   tick,
   createFileSystemEnv,
   waitFor,
@@ -147,4 +148,16 @@ test('screenshot copy, clipboard.write fails: message in the save status (0022)'
     /^Copy failed — NotAllowedError$/,
     'the write failure surfaces in the save status',
   );
+});
+
+test('SVG screenshots remain unavailable to the PNG-only copy action', async () => {
+  const { window, document } = loadPopulatedApp({ fs: createFileSystemEnv() });
+  await tick();
+  const calls = stubClipboardWrite(window);
+  const item = document.querySelector('#evidence .ev-screenshot');
+
+  sectionAction(item, 'copy').click();
+
+  assert.equal(calls.length, 0);
+  assert.equal(latestOperationResult(document).message, 'Copy unavailable — SVG screenshot');
 });

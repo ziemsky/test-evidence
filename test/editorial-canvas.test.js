@@ -41,19 +41,19 @@ test('the document title is a restrained, focused identity treatment', () => {
   assert.match(focus, /background:\s*var\(--ev-focus-surface\)/);
 });
 
-test('save controls and examples share one quiet utility strip', () => {
+test('save, print, and appearance controls share one quiet utility strip', () => {
   const { document } = loadApp();
   const toolbar = document.getElementById('toolbar');
   const actions = toolbar.querySelector('.toolbar-actions');
-  const examples = toolbar.querySelector('.toolbar-examples');
+  const utilities = toolbar.querySelector('.toolbar-utilities');
 
   assert.ok(actions, 'save controls are grouped');
-  assert.ok(examples, 'examples controls are grouped');
+  assert.ok(utilities, 'print and appearance controls are grouped');
   assert.ok(actions.contains(document.getElementById('save-btn')));
   assert.equal(document.getElementById('mode-indicator'), null);
   assert.equal(document.getElementById('save-status'), null);
-  assert.ok(examples.contains(document.getElementById('example-btn')));
-  assert.ok(examples.contains(document.getElementById('example-menu')));
+  assert.ok(utilities.contains(document.getElementById('print-btn')));
+  assert.ok(utilities.contains(document.getElementById('theme-toggle')));
 });
 
 test('content edits and additions warn on Save until the document is saved', async () => {

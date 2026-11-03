@@ -378,7 +378,7 @@ test('paste after consumes the local snapshot and paste here requires a new copy
 });
 
 test('next copy element replaces the local fallback, and external copy is unchanged', async () => {
-  const { window, document, downloads } = loadApp();
+  const { window, document } = loadApp();
   const section = addFirstSection(document);
   sectionAction(section, 'add-comment').click();
   sectionAction(section, 'add-property').click();
@@ -401,12 +401,6 @@ test('next copy element replaces the local fallback, and external copy is unchan
   await Promise.resolve();
   assert.deepEqual(external, ['property value']);
 
-  window.confirm = () => true;
-  document.getElementById('example-btn').click();
-  document.querySelector('#example-menu [data-action="apply-example"]').click();
-  assert.ok(sectionAction(document, 'paste-here'));
-  assert.ok(sectionAction(document, 'paste-after'));
-  assert.deepEqual(downloads, []);
 });
 
 test('pasted rows are ordinary saved content and reopen without copied chrome', async () => {

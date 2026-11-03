@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { sectionAction,
   loadApp,
+  loadPopulatedApp,
   tick,
   downloadText,
   createFileSystemEnv,
@@ -44,24 +45,21 @@ test('pending screenshot hint matches the full-width paste guidance style', () =
 });
 
 test('every screenshot exposes size presets before Copy and Delete; selecting one saves its display metadata (0048)', () => {
-  const { document, window } = loadApp();
-  window.confirm = () => true;
-  document.getElementById('example-btn').click();
-  sectionAction(document, 'apply-example').click();
+  const { document, window } = loadPopulatedApp();
   const example = document.querySelector('.ev-screenshot');
-  assert.ok(example, 'the pre-existing example screenshot is present');
-  assert.equal(example.dataset.size, 'small', 'the example screenshot uses compact sizing for the demo row');
+  assert.ok(example, 'the fixture screenshot is present');
+  assert.equal(example.dataset.size, 'small', 'the fixture screenshot uses compact sizing for the demo row');
 
   const controls = example.querySelector(':scope > .ev-controls');
   assert.deepEqual(
     [...controls.querySelectorAll('[data-action]')].map((button) => button.dataset.action),
-    ['size-small', 'size-medium', 'size-large', 'size-page-width', 'size-original', 'size-larger', 'size-smaller', 'standalone', 'open-image', 'copy', 'paste-after', 'delete'],
+    ['size-small', 'size-medium', 'size-large', 'size-page-width', 'size-original', 'size-larger', 'size-smaller', 'standalone', 'open-image', 'rename-file', 'copy', 'paste-after', 'delete'],
     'sizing shares the screenshot control row and precedes its established actions',
   );
 
   sectionAction(controls, 'size-large').click();
   assert.equal(example.dataset.size, 'large', 'the selected preset is content metadata');
-  assert.equal(example.querySelector('img').getAttribute('src').startsWith('data:image/svg+xml'), true,
+  assert.equal(example.querySelector('img').getAttribute('src'), 'assets/example-ers1234-shortlist.svg',
     'changing display size never changes the image source');
   assert.equal(window.getComputedStyle(example.querySelector('img')).height, 'auto',
     'the display rule preserves intrinsic aspect ratio');

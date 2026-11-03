@@ -2,12 +2,14 @@ import { latestOperationResult } from './helpers.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
+import { readFileSync } from 'node:fs';
 import {
   sectionAction,
   appSource,
   createFileSystemEnv,
   downloadText,
   loadApp,
+  populatedAppSource,
   tick,
   waitFor,
   documentHandleKey,
@@ -459,19 +461,17 @@ test('a failed write changes nothing and reports Rename failed — <message>', a
 });
 
 // ---------------------------------------------------------------------
-// The example SVG renames like any asset; A4 after a rename
+// The fixture SVG renames like any asset; A4 after a rename
 // ---------------------------------------------------------------------
 
-test('the example SVG renames like any asset, and a later apply writes its canonical name anew', async () => {
+test('the fixture SVG renames like any asset', async () => {
   const fs = createFileSystemEnv();
   rememberFolder(fs);
-  const { window, document } = loadApp(undefined, { fs });
-  window.confirm = () => true;
+  const { window, document } = loadApp(populatedAppSource(), { fs });
+  fs.env.assetsFiles.set('example-ers1234-shortlist.svg', new window.Blob([
+    readFileSync(new URL('./fixtures/default-content/assets/example-ers1234-shortlist.svg', import.meta.url)),
+  ]));
   await tick(); // initMode restores the remembered handle
-  document.getElementById('example-btn').click();
-  sectionAction(document, 'apply-example').click();
-  await waitFor(() => (document.querySelector('img.ev-img')?.getAttribute('src') || '') === 'assets/example-ers1234-shortlist.svg');
-  await tick();
 
   stubPrompt(window, 'renamed-example.svg');
   document.querySelector('.ev-screenshot [data-action="rename-file"]').click();
@@ -480,12 +480,6 @@ test('the example SVG renames like any asset, and a later apply writes its canon
   assert.equal(document.querySelector('.ev-screenshot > .ev-filename').textContent, 'renamed-example.svg', 'the label follows');
   assert.ok(fs.env.assetsFiles.has('renamed-example.svg'), 'the bytes moved on disk');
   assert.deepEqual(fs.env.removedAssets, ['example-ers1234-shortlist.svg']);
-
-  // a later apply writes the canonical name anew (§20 unchanged)
-  document.getElementById('example-btn').click();
-  sectionAction(document, 'apply-example').click();
-  await waitFor(() => (document.querySelector('img.ev-img')?.getAttribute('src') || '') === 'assets/example-ers1234-shortlist.svg');
-  assert.ok(fs.env.assetsFiles.has('example-ers1234-shortlist.svg'), 'the canonical name is written anew');
 });
 
 test('save → reload → save stays byte-identical after a rename (A4)', async () => {

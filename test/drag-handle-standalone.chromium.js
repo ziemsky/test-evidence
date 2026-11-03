@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { createTestDocument } from '../scripts/create-test-document.js';
 
-// 0105 follow-up: in the ERS-1234 example the third screenshot is authored
+// 0105 follow-up: in the populated fixture the third screenshot is authored
 // standalone. A standalone shot in a row is a CSS GRID container whose
 // image and drag handle share one grid area, so the handle's top/left inset
 // resolves against the GRID AREA, not the item's padding box. The handle
@@ -13,7 +13,8 @@ import { fileURLToPath } from 'node:url';
 // real-layout check: jsdom cannot evaluate grid geometry.
 // Run with `npm run test:chromium:handles`; the jsdom suite stays portable.
 
-const appPath = fileURLToPath(new URL('../index.html', import.meta.url));
+const fixtureDir = createTestDocument(mkdtempSync(join(tmpdir(), 'test-evidence-fixture-')));
+const appPath = join(fixtureDir, 'index.html');
 
 function chromiumEndpoint(child) {
   return new Promise((resolve, reject) => {
@@ -113,11 +114,7 @@ try {
   await wait(300);
 
   const handles = await evaluate(client, async () => {
-    // Apply the ERS-1234 example (three screenshots, the third standalone).
-    window.confirm = () => true;
-    document.getElementById('example-btn').click();
-    document.querySelector('#example-menu [data-action="apply-example"]').click();
-    // Wait until all three example images have rendered.
+    // Wait until all three fixture images have rendered.
     const deadline = Date.now() + 10_000;
     for (;;) {
       const shots = [...document.querySelectorAll('#evidence .ev-screenshot')];
@@ -125,7 +122,7 @@ try {
         const image = s.querySelector('img');
         return image && image.complete && image.naturalWidth > 0;
       })) break;
-      if (Date.now() > deadline) throw new Error('example screenshots did not render');
+      if (Date.now() > deadline) throw new Error('fixture screenshots did not render');
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
     // Let load handlers and a paint settle.
@@ -143,8 +140,8 @@ try {
     });
   });
 
-  assert.equal(handles.length, 3, 'the example has three screenshots');
-  assert.equal(handles[2].standalone, true, 'the third example screenshot is standalone');
+  assert.equal(handles.length, 3, 'the fixture has three screenshots');
+  assert.equal(handles[2].standalone, true, 'the third fixture screenshot is standalone');
   for (const shot of handles) {
     assert.ok(
       Math.abs(shot.leftOffset - 2) < 1 && Math.abs(shot.topOffset - 2) < 1,
@@ -153,7 +150,8 @@ try {
   }
 
   client.close();
-  console.log('ok — example drag handles align to the image top-left corner');
+  console.log('ok — fixture drag handles align to the image top-left corner');
 } finally {
   child.kill();
+  rmSync(fixtureDir, { recursive: true, force: true });
 }

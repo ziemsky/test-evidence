@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { sectionAction, addFirstSection, appSource, downloadText, loadApp, screenStyles, stylesheetRule } from './helpers.js';
+import { sectionAction, addFirstSection, appSource, downloadText, loadApp, loadPopulatedApp, screenStyles, stylesheetRule } from './helpers.js';
 
 function screenCss() {
   return screenStyles().split('@media print')[0];
@@ -48,11 +48,8 @@ test('focus treatment keeps the whole row identifiable without restoring a domin
   }
 });
 
-test('the complete example keeps its hierarchy, active editing seam, and screenshot metadata', () => {
-  const { document, window } = loadApp();
-  window.confirm = () => true;
-  document.getElementById('example-btn').click();
-  sectionAction(document, 'apply-example').click();
+test('the populated fixture keeps its hierarchy, active editing seam, and screenshot metadata', () => {
+  const { document } = loadPopulatedApp();
 
   assert.deepEqual(
     [...document.querySelectorAll('#evidence > .ev-section > .ev-title > .ev-title-text')].map((title) => title.textContent),

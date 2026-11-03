@@ -81,11 +81,10 @@ test('the toolbar toggle changes appearance, shows the target, and remembers the
   const { document, media } = loadThemeApp({ dark: true, storage });
   const print = document.getElementById('print-btn');
   const toggle = document.getElementById('theme-toggle');
-  const examples = document.getElementById('example-btn');
 
   assert.ok(toggle);
   assert.equal(print.nextElementSibling, toggle);
-  assert.equal(toggle.nextElementSibling, examples);
+  assert.equal(toggle.nextElementSibling, null);
   assert.equal(toggle.getAttribute('aria-label'), 'Switch to light appearance');
   toggle.click();
   assert.equal(appearance(document), 'light');

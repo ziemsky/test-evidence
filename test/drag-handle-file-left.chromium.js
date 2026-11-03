@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { createTestDocument } from '../scripts/create-test-document.js';
 
 // 0105 follow-up: the file row carries a "• " list marker as the row's first
 // inline box (.ev-file::before, outside the underlined link per 0075/0076).
@@ -13,7 +13,8 @@ import { fileURLToPath } from 'node:url';
 // row's handle. jsdom cannot evaluate layout; run under headless Chromium
 // via CDP (`npm run test:chromium:file-handle`).
 
-const appPath = fileURLToPath(new URL('../index.html', import.meta.url));
+const fixtureDir = createTestDocument(mkdtempSync(join(tmpdir(), 'test-evidence-fixture-')));
+const appPath = join(fixtureDir, 'index.html');
 
 function chromiumEndpoint(child) {
   return new Promise((resolve, reject) => {
@@ -113,9 +114,6 @@ try {
   await wait(300);
 
   const rows = await evaluate(client, async () => {
-    window.confirm = () => true;
-    document.getElementById('example-btn').click();
-    document.querySelector('#example-menu [data-action="apply-example"]').click();
     const deadline = Date.now() + 10_000;
     for (;;) {
       const files = [...document.querySelectorAll('#evidence .ev-file')];
@@ -142,7 +140,7 @@ try {
   });
 
   const fileRows = rows.filter((row) => row.kind === 'div.ev-file');
-  assert.ok(fileRows.length, 'the example contains at least one file row');
+  assert.ok(fileRows.length, 'the fixture contains at least one file row');
   for (const row of rows) {
     assert.equal(
       row.leftOffset, 0,
@@ -161,4 +159,5 @@ try {
     `file row handle at (0, ${fileRows[0].topOffset})`);
 } finally {
   child.kill();
+  rmSync(fixtureDir, { recursive: true, force: true });
 }

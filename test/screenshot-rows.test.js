@@ -238,9 +238,9 @@ test('CSS: rows are flex-wrap with the alignment mapping, an at-rest-invisible h
   assert.ok(/flex-wrap:\s*wrap/.test(rowCss), '…and wraps');
   assert.ok(/align-items:\s*flex-start/.test(rowCss), 'the top default is align-items: flex-start');
   assert.ok(/justify-content:\s*center/.test(rowCss), 'the center default is justify-content: center');
-  // an untouched row is visually indistinguishable from the flat layout:
-  // the gap reproduces the collapsed 0.2em block-margin rhythm
-  assert.ok(/row-gap:\s*0\.2em/.test(rowCss), 'row-gap equals the flat layout\'s vertical rhythm (0.2em)');
+  assert.ok(/margin-block:\s*1\.25em/.test(rowCss), 'screenshots have space from surrounding content');
+  assert.ok(/row-gap:\s*1em/.test(rowCss), 'wrapped images have vertical space');
+  assert.ok(/column-gap:\s*32px/.test(rowCss), 'neighboring images have horizontal space');
   assert.match(source, /\.ev-shot-row\[data-valign="middle"\]\s*\{[^}]*align-items:\s*center/);
   assert.match(source, /\.ev-shot-row\[data-valign="bottom"\]\s*\{[^}]*align-items:\s*flex-end/);
   assert.match(source, /\.ev-shot-row\[data-halign="center"\]\s*\{[^}]*justify-content:\s*center/);

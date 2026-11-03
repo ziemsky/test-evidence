@@ -21,7 +21,36 @@
   --ev-title-caret-color: #0078d7;
   --ev-hover-surface: rgba(128, 128, 128, 0.08);
 }
-:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ev-page-surface: #e8e8e4;
+  --ev-primary-text: #2c3133;
+  --ev-muted-text: #50565a;
+  --ev-muted-text-strong: #50565a;
+  --ev-focus-edge: #125b8e;
+}
+:root[data-theme="light"] a {
+  color: #125b8e;
+}
+:root[data-theme="light"] #help-toggle,
+:root[data-theme="light"] #save-btn,
+:root[data-theme="light"] #print-btn,
+:root[data-theme="light"] #theme-toggle {
+  color: var(--ev-muted-text-strong);
+}
+:root[data-theme="light"] #save-btn.has-unsaved-changes,
+:root[data-theme="light"] #save-btn.has-unsaved-changes:hover {
+  color: var(--ev-primary-text);
+}
+:root[data-theme="light"] .toc-caption {
+  color: var(--ev-muted-text);
+  opacity: 1;
+}
+:root[data-theme="light"] .ev-caption,
+:root[data-theme="light"] #evidence > .ev-section-palette > .ev-section-palette-header,
+:root[data-theme="light"] #evidence > .ev-end-add-toolbox .ev-action-shortcut {
+  color: var(--ev-muted-text);
+}
 :root[data-theme="dark"] {
   color-scheme: dark;
   --ev-page-surface: #222222;
@@ -440,7 +469,7 @@ body.help-open #help-panel {
   cursor: pointer;
 }
 #toolbar .toolbar-actions,
-#toolbar .toolbar-examples {
+#toolbar .toolbar-utilities {
   display: flex;
   align-items: center;
 }
@@ -448,14 +477,13 @@ body.help-open #help-panel {
   min-width: 0;
   gap: 10px;
 }
-#toolbar .toolbar-examples {
+#toolbar .toolbar-utilities {
   position: relative;
   flex: none;
 }
 #save-btn,
 #print-btn,
-#theme-toggle,
-#example-btn {
+#theme-toggle {
   font-size: 0.82em;
   color: rgba(128, 128, 128, 0.9);
   background: none;
@@ -464,8 +492,7 @@ body.help-open #help-panel {
 }
 #save-btn:hover,
 #print-btn:hover,
-#theme-toggle:hover,
-#example-btn:hover {
+#theme-toggle:hover {
   color: inherit;
   border-color: rgba(128, 128, 128, 0.4);
 }
@@ -486,48 +513,6 @@ body.help-open #help-panel {
   #save-btn.has-unsaved-changes {
     animation: none;
   }
-}
-/* 0042 (SPEC §11/§20): the quiet Examples dropdown — a small button at the
-   right end of the toolbar row and a small list
-   below it. Same quietness rule as the control-row buttons: muted, quiet
-   border on hover; a long document must not read as button noise. The
-   dropdown is absolutely positioned under the button (the sticky toolbar
-   is its containing block) so it floats over the document without
-   shifting any layout. */
-#example-btn {
-  font-size: 0.85em;
-  padding: 2px 8px;
-  cursor: pointer;
-}
-#example-menu {
-  position: absolute;
-  top: 100%;
-  right: 0; /* aligns with the button's right edge */
-  display: none;
-  min-width: 12em;
-  padding: 2px 0;
-  background: inherit;
-  border: 1px solid rgba(128, 128, 128, 0.4);
-  border-radius: 3px;
-  z-index: 11;
-}
-#example-menu.open {
-  display: block;
-}
-#example-menu button {
-  display: block;
-  width: 100%;
-  font: inherit;
-  font-size: 0.85em;
-  padding: 2px 10px;
-  text-align: left;
-  color: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-#example-menu button:hover {
-  background: rgba(128, 128, 128, 0.14);
 }
 .ev-section {
   position: relative;
@@ -614,10 +599,8 @@ body.help-open #help-panel {
 .ev-doc-title-text {
   display: inline-block;
 }
-/* 0076: screenshots are evidence figures, not bare media rows. Keep the
-   figure surface on the actual image so unsized legacy/page-width items do
-   not become full-width decorated panels; the row and its existing per-image
-   sizing metadata still own the available width and wrapping behavior. */
+/* Screenshot rows keep their existing per-image sizing metadata and wrapping
+   behavior while leaving the image's own edges unobstructed. */
 .ev-screenshot {
   box-sizing: border-box;
   min-width: 0;
@@ -626,14 +609,9 @@ body.help-open #help-panel {
 }
 .ev-screenshot > .ev-img {
   box-sizing: border-box;
-  border: 1px solid var(--ev-divider);
-  border-radius: 6px;
-  background: rgba(128, 128, 128, 0.04);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
 }
 .ev-screenshot > .ev-caption {
-  /* Keep the metadata visually tied to the decorated image, without
-     inheriting the image's contrast or competing with its pixels. */
+  /* Keep the metadata visually tied to its image without competing with it. */
   padding-left: 0.2em;
   padding-right: 0.2em;
 }
@@ -953,13 +931,13 @@ h2.ev-title:focus-within,
    verbatim per image), wrapping happens purely on the images' existing
    rendered widths. Flex items are the whole .ev-screenshot units (image +
    caption + controls) — captions stick to their images. Defaults are
-   top/center: an untouched row is visually indistinguishable from the flat
-   layout except for the hover affordances. */
+   top/center, with space between the images and surrounding content. */
 .ev-shot-row {
   display: flex;
   flex-wrap: wrap;
   position: relative;
   box-sizing: border-box;
+  margin-block: 1.25em;
   width: min(var(--ev-media-measure), calc(100vw - var(--ev-toc-width) - 2 * var(--ev-page-gutter)));
   /* The media lane may be wider than the reading measure, but it must still
      belong to the evidence canvas. Without this cap the viewport-sized lane
@@ -968,8 +946,8 @@ h2.ev-title:focus-within,
   max-width: 100%;
   padding-left: var(--ev-content-start);
   padding-top: 0.5em;
-  row-gap: 0.2em; /* flat rhythm: adjacent 0.2em block margins collapse to 0.2em; flex items don't collapse */
-  column-gap: 12px;
+  row-gap: 1em;
+  column-gap: 32px;
   align-items: flex-start; /* data-valign: top (default) */
   justify-content: center; /* data-halign: center (default) */
 }
@@ -1816,6 +1794,9 @@ h2.ev-title:hover > .ev-drag-handle {
     background: white;
     color: black;
   }
+  :root[data-theme="light"] a {
+    color: black;
+  }
   body,
   body.toc-collapsed,
   body.help-open {
@@ -1891,12 +1872,6 @@ h2.ev-title:hover > .ev-drag-handle {
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  .ev-screenshot > .ev-img {
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    background: transparent;
-  }
   .ev-img {
     max-width: 100%;
     height: auto;
@@ -1920,37 +1895,6 @@ h2.ev-title:hover > .ev-drag-handle {
 </head>
 <body>
 <main id="evidence"><h1 class="ev-doc-title"><span class="ev-text ev-doc-title-text"></span></h1></main>
-<!-- 0042 (SPEC §2/§3/§20): the example's mock screenshot, inlined as a
-     hidden SVG definition — app code, not chrome. It serializes into
-     saved files as-is (like the <script> below), so a saved file
-     re-opens with the example feature intact. Pixels are free (§20). -->
-<svg id="example-shot-svg" xmlns="http://www.w3.org/2000/svg" width="460" height="240" viewBox="0 0 460 240" style="display:none" aria-hidden="true">
-  <rect x="1" y="1" width="458" height="238" rx="6" fill="#f7f7f5" stroke="#b5b5b0" stroke-width="2"/>
-  <text x="24" y="56" font-family="system-ui, sans-serif" font-size="16" fill="#333333">MOCK SCREENSHOT OF A WEB APPLICATION</text>
-  <text x="24" y="88" font-family="system-ui, sans-serif" font-size="16" fill="#333333">SHOWING BASIC DETAILS OF A REFERRAL</text>
-  <text x="24" y="120" font-family="system-ui, sans-serif" font-size="16" fill="#333333">WITH STATE 'TRIAGED - PROVIDER TO ACTION'</text>
-  <text x="24" y="152" font-family="system-ui, sans-serif" font-size="16" fill="#333333">PROMINENTLY PRESENTED</text>
-  <circle cx="410" cy="56" r="22" fill="none" stroke="#555555" stroke-width="2" stroke-dasharray="3 5"/>
-</svg>
-<!-- 0091: additional authored evidence for the ERS-1234 before/after example. -->
-<svg id="example-shortlist-after-svg" xmlns="http://www.w3.org/2000/svg" width="460" height="240" viewBox="0 0 460 240" style="display:none" aria-hidden="true">
-  <rect x="1" y="1" width="458" height="238" rx="6" fill="#f7f7f5" stroke="#8fae8f" stroke-width="2"/>
-  <text x="24" y="56" font-family="system-ui, sans-serif" font-size="16" fill="#333333">REFERRAL SHORTLIST AFTER UPDATE</text>
-  <text x="24" y="88" font-family="system-ui, sans-serif" font-size="16" fill="#333333">CARDIOLOGY ADDED BY THE SPC</text>
-  <text x="24" y="120" font-family="system-ui, sans-serif" font-size="16" fill="#333333">STATE 'TRIAGED - PROVIDER TO ACTION'</text>
-  <text x="24" y="152" font-family="system-ui, sans-serif" font-size="16" fill="#333333">UPDATE READY TO SAVE</text>
-  <circle cx="410" cy="56" r="22" fill="none" stroke="#4f7f4f" stroke-width="2"/>
-  <path d="M398 56l8 8 16-18" fill="none" stroke="#4f7f4f" stroke-width="3"/>
-</svg>
-<svg id="example-shortlist-audit-svg" xmlns="http://www.w3.org/2000/svg" width="460" height="240" viewBox="0 0 460 240" style="display:none" aria-hidden="true">
-  <rect x="1" y="1" width="458" height="238" rx="6" fill="#f7f7f5" stroke="#8f9fb0" stroke-width="2"/>
-  <text x="24" y="56" font-family="system-ui, sans-serif" font-size="16" fill="#333333">AUDIT EVENT RECORDED</text>
-  <text x="24" y="88" font-family="system-ui, sans-serif" font-size="16" fill="#333333">REFERRAL REF-1234</text>
-  <text x="24" y="120" font-family="system-ui, sans-serif" font-size="16" fill="#333333">ACTOR SPC-321564</text>
-  <text x="24" y="152" font-family="system-ui, sans-serif" font-size="16" fill="#333333">SHORTLIST UPDATE PASSED</text>
-  <circle cx="410" cy="56" r="22" fill="none" stroke="#536d89" stroke-width="2"/>
-  <path d="M398 56h24M410 44v24" stroke="#536d89" stroke-width="3"/>
-</svg>
 <script>
 (function () {
   'use strict';
@@ -2388,115 +2332,6 @@ h2.ev-title:hover > .ev-drag-handle {
     document.querySelectorAll('.ev-controls > button[data-action="copy"]')
       .forEach(updateScreenshotCopyAvailability);
   }
-
-  // 0042/0091 (SPEC §20): the example registry — the data seam. One entry
-  // per example: label, document definition, and the authored assets needed
-  // by that document. Adding a future example = one entry here + one menu
-  // row (renderToolbar renders from this list).
-  var EXAMPLES = [
-    {
-      id: 'ers1234-shortlist',
-      label: 'ERS-1234: update a shortlist',
-      asset: 'example-ers1234-shortlist.svg',
-      assets: [
-        { name: 'example-ers1234-shortlist.svg', svgId: 'example-shot-svg' },
-        { name: 'example-ers1234-shortlist-after.svg', svgId: 'example-shortlist-after-svg' },
-        { name: 'example-ers1234-shortlist-audit.svg', svgId: 'example-shortlist-audit-svg' },
-        {
-          name: 'example-ers1234-shortlist-response.json',
-          content: '{\n'
-            + '  "referralId": "REF-1234",\n'
-            + '  "action": "update-shortlist",\n'
-            + '  "added": ["Cardiology"],\n'
-            + '  "outcome": "passed"\n'
-            + '}\n',
-        },
-      ],
-      document: {
-        title: 'ERS-1234 — SPC updates the shortlist for a triaged referral',
-        sections: [
-          {
-            title: 'Test objective',
-            comments: ['Verify that an SPC can add Cardiology to the referral shortlist when the referral is in the \'Triaged - Provider to action\' state and owned by the Triage service.'],
-          },
-          {
-            title: 'Test data',
-            sections: [
-              { title: 'Referral', properties: [['Id', 'REF-1234'], ['State', 'Triaged - Provider to action'], ['Owning service', 'Triage service'], ['Initial shortlist', 'Respiratory']] },
-              { title: 'Patient', properties: [['Id', 'PAT-1234'], ['Name', 'Alex Morgan'], ['Role', 'Patient associated with the referral'], ['Organisation', 'R68']] },
-              { title: 'SPC', properties: [['Id', 'SPC-321564'], ['Name', 'Casey Morgan'], ['Role', 'SPC performing the shortlist update'], ['Organisation', 'R69']] },
-              { title: 'Triage service', properties: [['Name', 'Service A - Triage'], ['Provider', "Hell's Pass Hospital"], ['Organisation', 'R68']] },
-              // Adjacency demos: ordered bodies place comments around the
-              // property groups, and the code row sits between prose and a
-              // definition list (the convenience order cannot do either).
-              {
-                title: 'Referral notes',
-                body: [
-                  { comment: 'Triage recorded the referral from the ED discharge letter.\n\nThe shortlist was agreed at the 14 Mar MDT; Respiratory was added by the triage nurse before SPC review.' },
-                  { property: ['Note type', 'Triage annotation'] },
-                  { property: ['Recorded by', 'N. Okafor (triage nurse)'] },
-                  { property: ['Recorded at', '14 Mar, 09:41'] },
-                  { property: ['Review status', 'Unreviewed'] },
-                  { comment: 'Casey flagged the annotation during review because it references a cardiology finding.\n\nThe annotation stays attached to the referral after the shortlist update.' },
-                ],
-              },
-              {
-                title: 'Update request',
-                body: [
-                  { comment: 'The shortlist update goes out as a single JSON payload against the referral API.\n\nThe SPC never edits the payload by hand; the form builds it from the shortlist editor state.' },
-                  { code: '{\n  "referralId": "REF-1234",\n  "shortlist": ["Respiratory", "Cardiology"],\n  "submittedBy": "SPC-321564",\n  "idempotencyKey": "upd-9f2c"\n}\n' },
-                  { property: ['Content type', 'application/json'] },
-                  { property: ['Endpoint', '/api/referrals/REF-1234/shortlist'] },
-                  { property: ['Method', 'PUT'] },
-                ],
-              },
-              // Convenience fields already yield property -> file -> url order.
-              {
-                title: 'Linked references',
-                properties: [['Response file', 'example-ers1234-shortlist-response.json'], ['Record system', 'Referral manager (example.org)']],
-                files: [{ name: 'example-ers1234-shortlist-response.json' }],
-                urls: [{ url: 'https://example.org/audit/REF-1234', text: 'Audit trail for REF-1234' }],
-              },
-            ],
-          },
-          {
-            title: 'Preconditions',
-            comments: ['The SPC is signed in with permission to edit referral shortlists.\nThe referral is visible to the Triage service and currently has Respiratory on its shortlist.'],
-          },
-          {
-            title: 'Test steps',
-            sections: [
-              { title: 'Open referral', comments: ['Open referral REF-1234 from the Triage service work queue.'] },
-              { title: 'Update shortlist', comments: ['Add Cardiology to the shortlist and leave Respiratory unchanged.'] },
-              { title: 'Save update', comments: ['Save the referral and wait for the update confirmation.'] },
-            ],
-          },
-          {
-            title: 'Expected result',
-            comments: ['The shortlist contains Respiratory and Cardiology, the referral remains in \'Triaged - Provider to action\', and the update is recorded against the SPC.'],
-            code: '{\n  "referralId": "REF-1234",\n  "action": "update-shortlist",\n  "added": ["Cardiology"],\n  "outcome": "passed"\n}\n',
-          },
-          // Ordered body: the comment after the image row is the adjacency
-          // the convenience order (screenshot row last) cannot express.
-          {
-            title: 'Evidence',
-            body: [
-              { comment: 'See the URLs below for detailed evidence supporting this result.' },
-              { file: 'example-ers1234-shortlist-response.json' },
-              { url: { url: 'https://example.org/referrals/REF-1234', text: 'Referral record for REF-1234' } },
-              { url: { url: 'https://example.org/guidance/referral-shortlists', text: 'Referral shortlist guidance' } },
-              { screenshots: [
-                { asset: 'example-ers1234-shortlist.svg', caption: 'Referral before shortlist update', size: 'small' },
-                { asset: 'example-ers1234-shortlist-after.svg', caption: 'Referral after adding Cardiology to the shortlist', size: 'small' },
-                { asset: 'example-ers1234-shortlist-audit.svg', caption: 'Audit confirmation after shortlist update', size: 'small', standalone: true },
-              ] },
-              { comment: 'The audit shot is the closing evidence: it shows the update recorded against the SPC before the session ended.\n\nFuture shortlist changes on this referral should be captured with the same before/after pair plus the audit confirmation.' },
-            ],
-          },
-        ],
-      },
-    },
-  ];
 
   // 0070/0087/0089: keep an immutable local snapshot for one same-document paste.
   // Cross-document exchange uses the browser's native copy/paste events so
@@ -3727,17 +3562,6 @@ h2.ev-title:hover > .ev-drag-handle {
     });
   }
 
-  // 0042 (SPEC §20): the example dropdown's open state. Chrome — the
-  // dropdown closes on entry click, Esc, click outside, re-click, and
-  // once the confirmation resolves.
-  var exampleMenuOpen = false;
-
-  function setExampleMenu(open) {
-    exampleMenuOpen = open;
-    var menuEl = document.getElementById('example-menu');
-    if (menuEl) menuEl.classList.toggle('open', open);
-  }
-
   // 0103: appearance is browser chrome, not evidence content. The active
   // scheme lives on <html> only while this page is open; saved manual choice
   // lives in origin storage where the browser provides it.
@@ -3815,38 +3639,20 @@ h2.ev-title:hover > .ev-drag-handle {
     header.setAttribute('data-chrome', '');
     var save = element('button', null, 'Save');
     save.id = 'save-btn';
-    // 0042 (SPEC §11/§20): the quiet Examples dropdown at the right end of
-    // the toolbar row — one entry per example, mouse only. Chrome:
-    // re-created here at boot and stripped on save.
-    var exampleBtn = element('button', null, 'Examples ▾');
-    exampleBtn.id = 'example-btn';
-    exampleBtn.setAttribute('data-chrome', '');
-    exampleBtn.setAttribute('data-action', 'toggle-example-menu');
-    var exampleMenu = element('div', null);
-    exampleMenu.id = 'example-menu';
-    exampleMenu.setAttribute('data-chrome', '');
-    EXAMPLES.forEach(function (ex) {
-      var entry = element('button', null, ex.label);
-      entry.setAttribute('data-action', 'apply-example');
-      entry.dataset.example = ex.id;
-      exampleMenu.appendChild(entry);
-    });
     var actions = element('div', 'toolbar-actions');
     actions.appendChild(save);
-    var examples = element('div', 'toolbar-examples');
+    var utilities = element('div', 'toolbar-utilities');
     var print = element('button', null, 'Print');
     print.id = 'print-btn';
     print.setAttribute('data-chrome', '');
     print.setAttribute('data-action', 'print');
-    examples.appendChild(print);
+    utilities.appendChild(print);
     var theme = element('button', null, null);
     theme.id = 'theme-toggle';
     theme.setAttribute('data-chrome', '');
     theme.setAttribute('data-action', 'toggle-theme');
     updateThemeToggle(theme);
-    examples.appendChild(theme);
-    examples.appendChild(exampleBtn);
-    examples.appendChild(exampleMenu);
+    utilities.appendChild(theme);
     var helpOpen = document.body.classList.contains('help-open');
     var helpToggle = element('button', null, helpOpen ? 'x' : '?');
     helpToggle.id = 'help-toggle';
@@ -3857,10 +3663,9 @@ h2.ev-title:hover > .ev-drag-handle {
     helpToggle.setAttribute('aria-controls', 'help-panel');
     helpToggle.setAttribute('title', helpOpen ? 'Close help' : 'Open help');
     header.appendChild(actions);
-    header.appendChild(examples);
+    header.appendChild(utilities);
     document.body.insertBefore(header, document.body.firstChild);
     document.body.appendChild(helpToggle);
-    exampleMenuOpen = false; // a re-rendered toolbar is a closed menu
     updateSaveWarning();
   }
 
@@ -5481,239 +5286,6 @@ h2.ev-title:hover > .ev-drag-handle {
     return section;
   }
 
-  // 0042 (SPEC §20): entry click → confirm() with the locked wording →
-  // the wholesale apply. One code path — confirmed in every case,
-  // including an empty document (no empty special case).
-  function applyExampleFlow(entryBtn, operation) {
-    var example = EXAMPLES.find(function (ex) { return ex.id === entryBtn.dataset.example; });
-    if (!example) return;
-    setExampleMenu(false); // entry click closes the dropdown
-    var message =
-      'Replace this document with the "' + example.label + '" example? '
-      + 'The previous content will be unrecoverably lost, including its saved asset files.';
-    if (!confirm(message)) {
-      setExampleMenu(false); // the confirmation resolved: nothing else happens
-      return false;
-    }
-    setExampleMenu(false); // the confirmation resolved
-    return applyExample(example, operation);
-  }
-
-  // 0042 (SPEC §20): build an example's document as NORMAL content — the
-  // app's own element helpers, so real editables and rows; §5.3 strips
-  // contenteditable on save as usual.
-  function buildExampleDocument(def) {
-    var screenshotRefs = [];
-    function appendUrlItem(body, definition) {
-      var urlRow = makeUrlRow();
-      var inputs = urlEditorInputs(urlRow);
-      inputs.url.value = definition.url;
-      inputs.text.value = definition.text;
-      finishUrlEditing(urlRow);
-      body.appendChild(urlRow);
-    }
-    // Ordered body items: one entry per row, in authored order. Examples use
-    // this where they need adjacencies the convenience fields cannot
-    // express (their order is fixed: comments, code, properties, then
-    // files, urls, and the screenshot row last). Item keys: comment
-    // (string), code (string), property ([key, value]), file (name),
-    // url ({ url, text }), screenshots (array of shot definitions — one
-    // shot row at the item's position).
-    function appendScreenshotRow(body, shots) {
-      var row = makeShotRow();
-      shots.forEach(function (shot) {
-        var item = makeScreenshot(shot.caption, shot.size || 'medium');
-        if (shot.standalone) item.setAttribute('data-standalone', '');
-        var img = item.querySelector(':scope > img.ev-img');
-        screenshotRefs.push({ image: img, asset: shot.asset });
-        row.appendChild(item);
-      });
-      body.appendChild(row);
-    }
-    function appendBodyItem(body, item) {
-      if (item.comment != null) {
-        body.appendChild(makeComment(item.comment));
-      } else if (item.code != null) {
-        body.appendChild(makeCode(item.code));
-      } else if (item.property) {
-        body.appendChild(makeProperty(item.property[0], item.property[1]));
-      } else if (item.file != null) {
-        body.appendChild(makeFile(item.file));
-      } else if (item.url) {
-        appendUrlItem(body, item.url);
-      } else if (item.screenshots && item.screenshots.length) {
-        appendScreenshotRow(body, item.screenshots);
-      }
-    }
-    function buildSection(node) {
-      var section = makeSection(node.title != null ? node.title : '');
-      var body = section.querySelector(':scope > .ev-body');
-      if (node.body) {
-        node.body.forEach(function (item) { appendBodyItem(body, item); });
-      } else {
-        (node.comments || []).forEach(function (text) {
-          body.appendChild(makeComment(text));
-        });
-        if (node.code != null) body.appendChild(makeCode(node.code));
-        (node.properties || []).forEach(function (pair) {
-          body.appendChild(makeProperty(pair[0], pair[1]));
-        });
-      }
-      (node.sections || []).forEach(function (sub) {
-        body.appendChild(buildSection(sub));
-      });
-      if (node.fileLeadIn) body.appendChild(makeComment(node.fileLeadIn));
-      (node.files || []).forEach(function (file) {
-        body.appendChild(makeFile(file.name));
-      });
-      (node.urls || []).forEach(function (definition) {
-        appendUrlItem(body, definition);
-      });
-      var screenshots = node.screenshots || (node.screenshot ? [{
-        asset: null,
-        caption: node.screenshotCaption,
-        size: 'medium',
-      }] : []);
-      if (screenshots.length) appendScreenshotRow(body, screenshots);
-      return section;
-    }
-    return { sections: (def.sections || []).map(buildSection), screenshotRefs: screenshotRefs };
-  }
-
-  function exampleAssetDefinitions(example) {
-    return example.assets || [{ name: example.asset, svgId: 'example-shot-svg' }];
-  }
-
-  function exampleAssetSource(definition) {
-    if (definition.svgId) {
-      var svg = document.getElementById(definition.svgId);
-      return svg ? svg.outerHTML : '';
-    }
-    return definition.content != null ? definition.content : '';
-  }
-
-  // 0062: every physical asset name the document references — screenshot
-  // srcs as stored, plus file rows by their persisted (encoded) asset URL
-  // with the disk name decoded. Deduplicated: a shared asset may be
-  // referenced by several rows (cross-type included), and it is one file.
-  function referencedAssetNames(root) {
-    var names = [];
-    root.querySelectorAll('img[src^="assets/"]').forEach(function (img) {
-      var src = img.getAttribute('src') || '';
-      names.push(src.slice(src.lastIndexOf('/') + 1));
-    });
-    root.querySelectorAll('.ev-file > a[href^="assets/"]').forEach(function (link) {
-      var href = link.getAttribute('href') || '';
-      var encoded = href.slice(href.lastIndexOf('/') + 1);
-      try {
-        names.push(decodeURIComponent(encoded));
-      } catch (e) {
-        names.push(encoded); // a malformed percent-sequence: the raw name is the best fallback
-      }
-    });
-    var seen = new Set();
-    var unique = [];
-    names.forEach(function (name) {
-      if (!seen.has(name)) { seen.add(name); unique.push(name); }
-    });
-    return unique;
-  }
-
-  // 0042/0062 (SPEC §20): the wholesale apply. Content replacement never
-  // fails on FS — file work degrades per the FS-degradation rules
-  // (fallback / no handle yet → inline data-URL, no picker, no prompt;
-  // permission declined → inline result; a missing old asset is
-  // ignored; any other per-asset delete failure is reported and does not
-  // undo the replacement). No save is triggered.
-  async function applyExample(example, operation) {
-    var root = document.getElementById('evidence');
-    clearElementClipboardState(); // document replacement clears transient clipboard state
-    // 1: the old asset files to delete — screenshots AND file attachments,
-    // discovered before the replacement so the old rows cannot vanish
-    // first (the example's own asset is not old — a second apply overwrites
-    // it rather than deleting it first)
-    var exampleAssets = exampleAssetDefinitions(example);
-    var exampleAssetNames = new Set(exampleAssets.map(function (asset) { return asset.name; }));
-    var oldNames = referencedAssetNames(root).filter(function (name) {
-      return !exampleAssetNames.has(name);
-    });
-    // 2: wholesale content replacement — the title text, every section,
-    // and a pending screenshot placeholder (if any)
-    var title = root.querySelector(':scope > h1.ev-doc-title > .ev-doc-title-text');
-    title.textContent = example.document.title;
-    root.querySelectorAll(':scope > .ev-section').forEach(function (section) { section.remove(); });
-    var pending = root.querySelector('.ev-screenshot-pending');
-    if (pending) pending.remove();
-    var built = buildExampleDocument(example.document);
-    built.sections.forEach(function (section) { root.appendChild(section); });
-    // 3: store the example's authored assets. SVG screenshots are serialized
-    // raw, never rasterized; text assets retain their exact authored bytes.
-    var inlineSources = new Map();
-    exampleAssets.forEach(function (definition) {
-      var source = exampleAssetSource(definition);
-      if (definition.svgId) inlineSources.set(definition.name, 'data:image/svg+xml,' + encodeURIComponent(source));
-    });
-    var storedOnDisk = new Set();
-    var fileWorkFailure = null;
-    if (mode === 'primary' && dirHandle) {
-      // apply triggers no folder picker: only the ensurePermission() guard.
-      // A broken handle degrades like a declined one — the content
-      // replacement never fails on FS.
-      var granted;
-      try {
-        granted = await ensurePermission();
-      } catch (e) {
-        granted = false;
-      }
-      if (granted) {
-        try {
-          if (!assetsDir) assetsDir = await dirHandle.getDirectoryHandle('assets', { create: true });
-          for (var a = 0; a < exampleAssets.length; a++) {
-            var definition = exampleAssets[a];
-            try {
-              var fh = await assetsDir.getFileHandle(definition.name, { create: true });
-              var writable = await fh.createWritable();
-              await writable.write(exampleAssetSource(definition));
-              await writable.close(); // overwrite: repeated applies reuse the same names
-              storedOnDisk.add(definition.name);
-            } catch (writeError) {
-              if (!fileWorkFailure) fileWorkFailure = 'could not write ' + definition.name;
-            }
-          }
-          // Do not remove old evidence if the replacement asset set was only
-          // partially written; the content replacement itself still stands.
-          if (storedOnDisk.size === exampleAssets.length) {
-            for (var i = 0; i < oldNames.length; i++) {
-              try {
-                await assetsDir.removeEntry(oldNames[i]);
-              } catch (e) {
-                if (e && e.name === 'NotFoundError') continue; // a missing old asset is ignored
-                if (!fileWorkFailure) fileWorkFailure = 'could not delete ' + oldNames[i];
-              }
-            }
-          }
-        } catch (err) {
-          fileWorkFailure = fileWorkFailure || (err && err.message ? err.message : String(err));
-        }
-      } else {
-        fileWorkFailure = 'permission not granted';
-      }
-    }
-    built.screenshotRefs.forEach(function (ref) {
-      if (storedOnDisk.has(ref.asset)) ref.image.src = 'assets/' + ref.asset;
-      else ref.image.src = inlineSources.get(ref.asset) || '';
-    });
-    // 4: bookkeeping — re-seed the used names from the NEW document, re-render
-    // chrome (control rows, numbering, key alignment, + section button),
-    // sync the tab title and focus the title field.
-    seedUsedNames();
-    refreshChrome();
-    syncTabTitle();
-    if (fileWorkFailure) completeOperation(operation, 'Example file work failed — ' + fileWorkFailure, 'warning');
-    else completeOperation(operation, 'Example applied', 'success');
-    focusTextFieldAtEnd(title);
-  }
-
   // 0017: delete & section-delete confirmation (SPEC §10)
 
   function sectionDeleteMessage(section) {
@@ -6011,12 +5583,10 @@ h2.ev-title:hover > .ev-drag-handle {
     var img = screenshot ? screenshot.querySelector(':scope > img.ev-img') : null;
     if (!img) return;
     var src = img.getAttribute('src') || '';
-    // 0042 (SPEC §20, §9): the example's SVG screenshot (detected by its
-    // asset name / .svg src, stored on-disk or as a data-URL). Chromium's
-    // clipboard image write is PNG-only, so the copy is a no-op with a
-    // locked completion log.
+    // Chromium's clipboard image write is PNG-only. An SVG screenshot,
+    // whether stored on disk or inline, cannot be copied as PNG here.
     if (src.slice(-4) === '.svg' || src.indexOf('data:image/svg+xml') === 0) {
-      completeOperation(operation, 'Copy unavailable — example screenshot', 'information');
+      completeOperation(operation, 'Copy unavailable — SVG screenshot', 'information');
       return;
     }
     // Called from the click gesture (SPEC §9); every failure surfaces in the
@@ -6739,9 +6309,9 @@ h2.ev-title:hover > .ev-drag-handle {
     var button = event.target.closest && event.target.closest('[data-action]');
     if (!button) return null;
     var action = button.dataset.action;
-    if (['toggle-example-menu', 'toggle-toc', 'toc-goto'].includes(action)) return null;
+    if (['toggle-toc', 'toc-goto'].includes(action)) return null;
     var labels = {
-      'apply-example': 'Apply example', 'add-section': 'Add section',
+      'add-section': 'Add section',
       'add-section-after': 'Add section', 'add-subsection': 'Add subsection',
       'add-comment': 'Add comment', 'add-code': 'Add code', 'add-property': 'Add property',
       'add-file': 'Attach file', 'add-url': 'Add URL', 'add-screenshot': 'Add screenshot', delete: 'Delete',
@@ -6777,14 +6347,6 @@ h2.ev-title:hover > .ev-drag-handle {
     if (owner && palette && !palette.contains(event.target) && !owner.contains(event.target)) {
       closeSectionPalette();
     }
-    // 0042 (SPEC §20): a click outside the button and the menu closes the
-    // dropdown; the click itself still runs (toggle, entry, save, …).
-    if (exampleMenuOpen) {
-      var clickTarget = event.target;
-      if (!(clickTarget.closest && (clickTarget.closest('#example-menu') || clickTarget.closest('#example-btn')))) {
-        setExampleMenu(false);
-      }
-    }
     var saveBtn = event.target.closest('#save-btn');
     if (saveBtn) {
       return save(operation);
@@ -6795,10 +6357,6 @@ h2.ev-title:hover > .ev-drag-handle {
     var actionPalette = actionBtn.closest('[data-section-palette]');
     if (actionPalette && actionPalette.hasAttribute('data-palette-inert')) return;
     var action = actionBtn.dataset.action;
-    if (action === 'toggle-example-menu') {
-      setExampleMenu(!exampleMenuOpen); // mouse-only toggle
-      return;
-    }
     if (action === 'print') {
       window.print();
       return;
@@ -6822,9 +6380,6 @@ h2.ev-title:hover > .ev-drag-handle {
       var helpPanel = document.getElementById('help-panel');
       if (helpPanel) helpPanel.setAttribute('aria-hidden', String(!helpOpen));
       return;
-    }
-    if (action === 'apply-example') {
-      return applyExampleFlow(actionBtn, operation); // §20: confirm → apply
     }
     if (action === 'toggle-toc') {
       // 0044 (SPEC §21): flip the state and nothing else — the width and
@@ -7208,11 +6763,6 @@ h2.ev-title:hover > .ev-drag-handle {
       // a drag in flight: Esc cancels it, the DOM is unchanged
       event.preventDefault();
       cancelDrag();
-      return;
-    }
-    if (event.key === 'Escape' && exampleMenuOpen) {
-      // 0042 (SPEC §20): Esc closes the example dropdown
-      setExampleMenu(false);
       return;
     }
     if (event.key === 'Escape' && paletteOwnerTarget()) {

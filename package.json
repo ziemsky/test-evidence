@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "fixture": "node scripts/create-test-document.js",
     "test": "node --test test/*.test.js",
     "test:chromium": "node test/right-edge-palette.chromium.js",
     "test:chromium:status": "node test/status-bar.chromium.js",

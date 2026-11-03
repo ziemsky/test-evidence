@@ -82,7 +82,7 @@ test('an add operation logs its completion without a toolbar status display', as
   assert.match(logs[1], /Operation finished: Add comment — success —/);
 });
 
-test('paste, delete, screenshot, and example operations log categorized completions', async () => {
+test('paste, delete, and screenshot operations log categorized completions', async () => {
   const { window, document } = loadApp();
   const section = addFirstSection(document);
   sectionAction(section, 'add-comment').click();
@@ -112,15 +112,6 @@ test('paste, delete, screenshot, and example operations log categorized completi
   assert.match(logs[0], /Operation started: Add screenshot/);
   assert.match(logs[1], /Operation finished: Add screenshot — success/);
 
-  logs.length = 0;
-  document.getElementById('example-btn').click();
-  window.confirm = () => true;
-  document.querySelector('#example-menu [data-action="apply-example"]').click();
-  await tick();
-  assert.equal(latestOperationResult(document).outcome, 'success');
-  assert.equal(latestOperationResult(document).message, 'Example applied');
-  assert.match(logs[0], /Operation started: Apply example/);
-  assert.match(logs.at(-1), /Operation finished: Apply example — success — Example applied/);
 });
 
 test('a successful attachment logs after the file has been written', async () => {

@@ -52,20 +52,19 @@ test('print CSS explicitly removes chrome while retaining authored section numbe
   assert.match(rule(css, '.ev-shot-row:hover'), /background:\s*transparent\s*!important/, 'hover washes are absent');
 });
 
-test('Print and the theme toggle sit beside Examples and Print opens the browser dialogue', () => {
+test('Print and the theme toggle share the toolbar and Print opens the browser dialogue', () => {
   const { document, window } = loadApp();
   let printCalls = 0;
   window.print = () => { printCalls++; };
 
   const printButton = document.getElementById('print-btn');
   const themeButton = document.getElementById('theme-toggle');
-  const examplesButton = document.getElementById('example-btn');
   assert.ok(printButton, 'the Print button is present');
   assert.equal(printButton.textContent, 'Print');
   assert.equal(printButton.dataset.action, 'print');
   assert.ok(themeButton, 'the appearance toggle is present');
   assert.equal(printButton.nextElementSibling, themeButton, 'the appearance toggle sits beside Print');
-  assert.equal(themeButton.nextElementSibling, examplesButton, 'Examples follows the appearance toggle');
+  assert.equal(themeButton.nextElementSibling, null, 'the appearance toggle ends the utility strip');
 
   printButton.click();
   assert.equal(printCalls, 1, 'clicking Print delegates to window.print()');
