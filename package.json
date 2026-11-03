@@ -1,0 +1,16 @@
+{
+  "name": "test-evidence-capture",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:chromium": "node test/right-edge-palette.chromium.js",
+    "test:chromium:status": "node test/status-bar.chromium.js",
+    "test:chromium:handles": "node test/drag-handle-standalone.chromium.js",
+    "test:chromium:file-handle": "node test/drag-handle-file-left.chromium.js",
+    "test:chromium:toc-drag": "node test/toc-drag.chromium.js"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1"
+  }
+}
