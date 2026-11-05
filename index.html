@@ -3671,63 +3671,6 @@ h2.ev-title:hover > .ev-drag-handle {
 
   // 0115: one always-visible, document-end toolbox replaces the standalone
   // "+ section" button. It is chrome and is rebuilt at the live document end.
-  function endAddTargetLabel(section) {
-    var title = section.querySelector(':scope > .ev-title > .ev-title-text');
-    var number = section.querySelector(':scope > .ev-title > .ev-num');
-    var path = [];
-    for (var current = section; current; current = current.parentElement.closest('.ev-section')) {
-      var siblings = [...current.parentElement.children].filter(function (child) {
-        return child.matches('.ev-section');
-      });
-      path.unshift(siblings.indexOf(current) + 1);
-    }
-    return 'section ' + (number && number.textContent || path.join('.')) +
-      ' “' + (title && title.textContent.trim() || 'Untitled') + '”';
-  }
-
-  function updateEndAddTooltips(toolbox) {
-    var last = lastTopLevelSection();
-    var contentTarget = sectionAtDocumentEnd();
-    var body = contentTarget && contentTarget.querySelector(':scope > .ev-body');
-    var screenshotRows = body && body.querySelectorAll(':scope > .ev-shot-row');
-    var lastScreenshotRow = screenshotRows && screenshotRows[screenshotRows.length - 1];
-    var actions = {
-      'add-section': last
-        ? 'Add a new top-level section after ' + endAddTargetLabel(last) + '.'
-        : 'Add the first top-level section.',
-      'add-subsection': last
-        ? 'Add a subsection at the end of ' + endAddTargetLabel(last) + '.'
-        : 'Create the first top-level section, then add a subsection inside it.',
-      'add-comment': 'Add a comment',
-      'add-code': 'Add a code snippet',
-      'add-property': 'Add a key/value property',
-      'add-screenshot': 'Add a place to paste a screenshot',
-      'add-file': 'Choose a file to attach',
-      'add-url': 'Add a URL',
-    };
-    toolbox.querySelectorAll(':scope > button').forEach(function (button) {
-      var action = button.dataset.action;
-      var description;
-      if (action === 'add-section' || action === 'add-subsection') {
-        description = actions[action];
-      } else {
-        description = actions[action] + (contentTarget
-          ? action === 'add-screenshot' && lastScreenshotRow
-            ? ' after the final screenshot in the last screenshot row of ' + endAddTargetLabel(contentTarget) + '.'
-            : ' at the end of ' + endAddTargetLabel(contentTarget) + '.'
-          : ' in a new first top-level section.');
-      }
-      if (button.disabled) {
-        var reason = action === 'add-file'
-          ? 'File attachments require File System Access'
-          : 'Adding screenshots requires File System Access';
-        button.title = reason + '. When available: ' + description;
-      } else {
-        button.title = description;
-      }
-    });
-  }
-
   function makeEndAddToolbox() {
     var toolbox = chromeControls(END_ADD_ACTIONS, false, true);
     toolbox.classList.add('ev-end-add-toolbox');
@@ -3752,9 +3695,6 @@ h2.ev-title:hover > .ev-drag-handle {
     [...toolbox.querySelectorAll(':scope > button')]
       .find(function (button) { return button.dataset.action === 'add-section'; })
       .classList.add('ev-add-section-btn');
-    updateEndAddTooltips(toolbox);
-    toolbox.addEventListener('mouseover', function () { updateEndAddTooltips(toolbox); });
-    toolbox.addEventListener('focusin', function () { updateEndAddTooltips(toolbox); });
     return toolbox;
   }
 
@@ -3858,8 +3798,6 @@ h2.ev-title:hover > .ev-drag-handle {
     if (!records.some(mutationIsAuthored)) return;
     saveRevision += 1;
     updateSaveWarning();
-    var endToolbox = document.querySelector('#evidence > [data-add-toolbox]');
-    if (endToolbox) updateEndAddTooltips(endToolbox);
   }
 
   function revisionForSave() {
@@ -3912,8 +3850,6 @@ h2.ev-title:hover > .ev-drag-handle {
     refreshPrintVisibility();
     positionActivePalette();
     refreshClipboardIndicators();
-    var endToolbox = document.querySelector('#evidence > [data-add-toolbox]');
-    if (endToolbox) updateEndAddTooltips(endToolbox);
   }
 
   // ---------------------------------------------------------------------

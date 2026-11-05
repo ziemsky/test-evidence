@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadApp, createFileSystemEnv, downloadText, addFirstSection, sectionAction, sectionPalette, screenStyles, stylesheetRule, assertCaretAtEnd } from './helpers.js';
+import { loadApp, downloadText, addFirstSection, sectionAction, sectionPalette, screenStyles, stylesheetRule, assertCaretAtEnd } from './helpers.js';
 
 // 0115: the persistent add toolbox replaces the standalone + section button.
 // 0040: bare boot has no sections, so the toolbox sits below the title row
@@ -14,67 +14,6 @@ const endAddAction = (document, action) => {
   assert.ok(button, `the persistent add toolbox exposes ${action}`);
   button.click();
 };
-
-const endAddButton = (document, action) =>
-  document.querySelector('#evidence > [data-add-toolbox] > button[data-action="' + action + '"]');
-
-test('global add tooltips explain each action in an empty document', () => {
-  const { document } = loadApp(undefined, { fs: createFileSystemEnv() });
-  assert.match(endAddButton(document, 'add-section').title, /first top-level section/);
-  assert.match(endAddButton(document, 'add-subsection').title, /first top-level section.*subsection inside it/);
-  for (const [action, behavior] of [
-    ['add-comment', 'comment'], ['add-code', 'code snippet'],
-    ['add-property', 'key\/value property'], ['add-screenshot', 'paste a screenshot'],
-    ['add-file', 'file to attach'], ['add-url', 'URL'],
-  ]) {
-    assert.match(endAddButton(document, action).title, new RegExp(behavior + '.*new first top-level section'));
-  }
-});
-
-test('global add tooltips identify the actual section targeted by each action', () => {
-  const { document, window } = loadApp(undefined, { fs: createFileSystemEnv() });
-  endAddAction(document, 'add-section');
-  const section = document.querySelector('#evidence > .ev-section');
-  section.querySelector('.ev-title-text').textContent = 'Results';
-  sectionAction(section, 'add-subsection').click();
-  const nested = section.querySelector(':scope > .ev-body > .ev-section');
-  nested.querySelector('.ev-title-text').textContent = 'Retry';
-
-  for (const action of ['add-section', 'add-subsection', 'add-comment', 'add-code',
-    'add-property', 'add-screenshot', 'add-file', 'add-url']) {
-    endAddButton(document, action).dispatchEvent(new window.MouseEvent('mouseover', { bubbles: true }));
-  }
-  assert.match(endAddButton(document, 'add-section').title, /after section 1 “Results”/);
-  assert.match(endAddButton(document, 'add-subsection').title, /end of section 1 “Results”/);
-  for (const action of ['add-comment', 'add-code', 'add-property', 'add-screenshot', 'add-file', 'add-url']) {
-    assert.match(endAddButton(document, action).title, /end of section 1\.1 “Retry”/);
-  }
-
-  sectionAction(section, 'add-comment').click();
-  endAddButton(document, 'add-code').dispatchEvent(new window.FocusEvent('focusin', { bubbles: true }));
-  assert.match(endAddButton(document, 'add-code').title, /end of section 1 “Results”/);
-});
-
-test('global screenshot tooltip names the last screenshot row even when a comment follows it', () => {
-  const { document, window } = loadApp(undefined, { fs: createFileSystemEnv() });
-  endAddAction(document, 'add-section');
-  const section = document.querySelector('#evidence > .ev-section');
-  section.querySelector('.ev-title-text').textContent = 'Results';
-  const body = section.querySelector(':scope > .ev-body');
-  const row = document.createElement('div');
-  row.className = 'ev-shot-row';
-  const shot = document.createElement('div');
-  shot.className = 'ev-screenshot';
-  row.appendChild(shot);
-  body.appendChild(row);
-  sectionAction(section, 'add-comment').click();
-
-  const screenshotButton = endAddButton(document, 'add-screenshot');
-  screenshotButton.dispatchEvent(new window.MouseEvent('mouseover', { bubbles: true }));
-  assert.match(screenshotButton.title, /after the final screenshot in the last screenshot row of section 1 “Results”/);
-  screenshotButton.click();
-  assert.ok(row.querySelector(':scope > .ev-screenshot-pending'), 'the action uses the row named by the tooltip');
-});
 
 test('persistent add actions append to the latest subsection when it ends the document', () => {
   const { document } = loadApp();
