@@ -2268,7 +2268,8 @@ h2.ev-title:hover > .ev-drag-handle {
   function updateFileButtonAvailability(button) {
     var unavailable = mode === 'fallback' || typeof showOpenFilePicker !== 'function';
     button.disabled = unavailable;
-    if (unavailable) button.title = 'File attachments require File System Access';
+    if (button.closest('[data-add-toolbox]')) setEndAddTooltip(button);
+    else if (unavailable) button.title = 'File attachments require File System Access';
     else button.removeAttribute('title');
   }
 
@@ -2279,7 +2280,8 @@ h2.ev-title:hover > .ev-drag-handle {
   function updateScreenshotButtonAvailability(button) {
     var unavailable = !fileSystemAccessSupported;
     button.disabled = unavailable;
-    if (unavailable) button.title = 'Adding screenshots requires File System Access';
+    if (button.closest('[data-add-toolbox]')) setEndAddTooltip(button);
+    else if (unavailable) button.title = 'Adding screenshots requires File System Access';
     else button.removeAttribute('title');
   }
 
@@ -2366,6 +2368,17 @@ h2.ev-title:hover > .ev-drag-handle {
     .map(function (action) {
       return action.action === 'add-url' ? { action: action.action, label: '+ URL' } : action;
     }));
+  var END_CONTENT_DESTINATION = ' in the deepest trailing subsection, or the last top-level section. Creates a top-level section first if needed.';
+  var END_ADD_TOOLTIPS = {
+    'add-section': 'Add a new top-level section after the last top-level section.',
+    'add-subsection': 'Append a subsection to the last top-level section. Creates a top-level section first if needed.',
+    'add-comment': 'Append a comment' + END_CONTENT_DESTINATION,
+    'add-code': 'Append a code snippet' + END_CONTENT_DESTINATION,
+    'add-property': 'Append a key/value property' + END_CONTENT_DESTINATION,
+    'add-screenshot': 'Prepare a screenshot paste after the last screenshot in the ending section’s last screenshot row, or at that section’s end if it has no screenshot row. The ending section is the deepest trailing subsection, or otherwise the last top-level section. Creates a top-level section first if needed.',
+    'add-file': 'Attach a chosen file' + END_CONTENT_DESTINATION,
+    'add-url': 'Append a URL' + END_CONTENT_DESTINATION,
+  };
   var ITEM_ACTIONS = [
     { action: 'copy', label: 'copy' },
     { action: 'copy-element', label: 'copy element' },
@@ -3671,6 +3684,13 @@ h2.ev-title:hover > .ev-drag-handle {
 
   // 0115: one always-visible, document-end toolbox replaces the standalone
   // "+ section" button. It is chrome and is rebuilt at the live document end.
+  function setEndAddTooltip(button) {
+    var reason = button.dataset.action === 'add-file'
+      ? 'File attachments require File System Access. '
+      : 'Adding screenshots requires File System Access. ';
+    button.title = (button.disabled ? reason : '') + END_ADD_TOOLTIPS[button.dataset.action];
+  }
+
   function makeEndAddToolbox() {
     var toolbox = chromeControls(END_ADD_ACTIONS, false, true);
     toolbox.classList.add('ev-end-add-toolbox');
@@ -3686,6 +3706,7 @@ h2.ev-title:hover > .ev-drag-handle {
       'add-url': 'Ctrl+r',
     };
     toolbox.querySelectorAll(':scope > button').forEach(function (button) {
+      setEndAddTooltip(button);
       var shortcut = shortcuts[button.dataset.action];
       if (!shortcut) return;
       var hint = element('span', 'ev-action-shortcut', shortcut);

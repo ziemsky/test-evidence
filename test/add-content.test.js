@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadApp, downloadText, addFirstSection, sectionAction, sectionPalette, screenStyles, stylesheetRule, assertCaretAtEnd } from './helpers.js';
+import { loadApp, createFileSystemEnv, downloadText, addFirstSection, sectionAction, sectionPalette, screenStyles, stylesheetRule, assertCaretAtEnd } from './helpers.js';
 
 // 0115: the persistent add toolbox replaces the standalone + section button.
 // 0040: bare boot has no sections, so the toolbox sits below the title row
@@ -14,6 +14,35 @@ const endAddAction = (document, action) => {
   assert.ok(button, `the persistent add toolbox exposes ${action}`);
   button.click();
 };
+
+test('global add buttons explain their general insertion rules without naming a section', () => {
+  const { document } = loadApp(undefined, { fs: createFileSystemEnv() });
+  const button = (action) => document.querySelector('#evidence > [data-add-toolbox] > button[data-action="' + action + '"]');
+  assert.match(button('add-section').title, /new top-level section after the last top-level section/);
+  assert.match(button('add-subsection').title, /subsection to the last top-level section/);
+  for (const [action, behavior] of [
+    ['add-comment', 'comment'], ['add-code', 'code snippet'],
+    ['add-property', 'key\/value property'], ['add-file', 'chosen file'], ['add-url', 'URL'],
+  ]) {
+    assert.match(button(action).title, new RegExp(behavior + '.*deepest trailing subsection, or the last top-level section'));
+  }
+  assert.match(button('add-screenshot').title, /last screenshot row.*last top-level section/);
+  for (const action of ['add-subsection', 'add-comment', 'add-code', 'add-property', 'add-screenshot', 'add-file', 'add-url']) {
+    assert.match(button(action).title, /top-level section first if needed/);
+  }
+  const original = button('add-comment').title;
+  endAddAction(document, 'add-section');
+  assert.equal(button('add-comment').title, original, 'the wording stays the same as the document grows');
+});
+
+test('disabled global file and screenshot buttons retain access guidance and action descriptions', () => {
+  const { document } = loadApp(undefined, { fileSystemAccess: false });
+  const toolbox = document.querySelector('#evidence > [data-add-toolbox]');
+  const file = toolbox.querySelector('[data-action="add-file"]');
+  const screenshot = toolbox.querySelector('[data-action="add-screenshot"]');
+  assert.match(file.title, /File attachments require File System Access.*Attach a chosen file/);
+  assert.match(screenshot.title, /Adding screenshots requires File System Access.*Prepare a screenshot paste/);
+});
 
 test('persistent add actions append to the latest subsection when it ends the document', () => {
   const { document } = loadApp();
